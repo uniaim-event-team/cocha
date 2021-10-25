@@ -1,0 +1,6 @@
+boto3
+pandas
+numpy
+matplotlib
+boto3-stubs[s3,sqs,athena]
+data-science-types
