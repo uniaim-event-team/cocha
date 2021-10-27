@@ -1,3 +1,4 @@
+chalice
 boto3
 pandas
 numpy
