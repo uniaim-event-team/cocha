@@ -25,6 +25,8 @@ jobs:
         run: pip install mypy
       - name: Install pytest
         run: pip install pytest
+      - name: Install requirements
+        run: pip install -r requirements.txt
       - name: Run flake8
         uses: suo/flake8-github-action@releases/v1
         with:
