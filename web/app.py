@@ -57,3 +57,40 @@ def handle_sqs_message(event: SQSEvent) -> None:
                 get_request_distribution_graph(command_input[0], command_input[1], slack_channel)
         except Exception:
             post_text_to_slack(slack_channel or channel(), 'Nadie te quiere.')
+
+
+@app.route('/slack/lgtm', methods=['POST'], content_types=['application/x-www-form-urlencoded'])
+def slack_lgtm() -> Dict[str, str]:
+    """
+    BOT機能（おまけ）
+    :return:
+    """
+    request = app.current_request
+    query = {k: v for k, v in urllib.parse.parse_qsl((request.raw_body or b'').decode())}
+    command_input = query.get('text', '').split(' ')
+    if command_input[0] == 'all':
+        return {
+            "response_type": "in_channel",
+            "text": "<!channel> やあ、みんな！進捗はどうだい？困ったことがあったら相談してね！"
+        }
+    if command_input[0] == 'lgtm':
+        some_good_message = 'LGTM!'
+        return {
+            "response_type": "in_channel",
+            "text": f"<@{query.get('user_id')}> " + some_good_message
+        }
+    if command_input[0] == 'help':
+        return {
+            "response_type": "in_channel",
+            "text": "このアプリはChatOpsを推進するためにChaliceで作ったアプリだよ〜\n"
+                    "/lgtm all\n"
+                    "みんなの進捗を確認するよ〜\n"
+                    "/lgtm lgtm\n"
+                    "承認欲求を満たすよ〜\n"
+                    "/lgtm help\n"
+                    "使い方を説明するよ〜\n"
+        }
+    return {
+        "response_type": "in_channel",
+        "text": "Nadie te quiere."
+    }
