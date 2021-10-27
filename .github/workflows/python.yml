@@ -27,6 +27,10 @@ jobs:
         run: pip install pytest
       - name: Install requirements
         run: pip install -r requirements.txt
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements.txt') }}
       - name : temporary patch
         run: cp -r ../web/.mypy ../ & cp -r ../web/.flake8 ../
       - name: Run flake8
