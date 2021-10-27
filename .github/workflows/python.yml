@@ -38,13 +38,13 @@ jobs:
         run: cd web; pytest .
         env:
           ATHENA_AWS_ACCESS_KEY_ID: ${{ secrets.ATHENA_AWS_ACCESS_KEY_ID }}
-          ATHENA_AWS_SECRET_ACCESS_KEY: ${{ $secrets.ATHENA_AWS_SECRET_ACCESS_KEY }}
-          ATHENA_DATABASE: ${{ $secrets.ATHENA_DATABASE }}
-          LOG_TABLE_PREFIX: ${{ $secrets.LOG_TABLE_PREFIX }}
-          S3_LOG_BUCKET: ${{ $secrets.S3_LOG_BUCKET }}
-          S3_RESULT_BUCKET: ${{ $secrets.S3_RESULT_BUCKET }}
-          S3_RESULT_FOLDER: ${{ $secrets.S3_RESULT_FOLDER }}
-          ATHENA_SQS_URL: ${{ $secrets.ATHENA_SQS_URL }}
-          SLACK_BOT_TOKEN: ${{ $secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL: ${{ $secrets.SLACK_CHANNEL }}
+          ATHENA_AWS_SECRET_ACCESS_KEY: ${{ secrets.ATHENA_AWS_SECRET_ACCESS_KEY }}
+          ATHENA_DATABASE: ${{ secrets.ATHENA_DATABASE }}
+          LOG_TABLE_PREFIX: ${{ secrets.LOG_TABLE_PREFIX }}
+          S3_LOG_BUCKET: ${{ secrets.S3_LOG_BUCKET }}
+          S3_RESULT_BUCKET: ${{ secrets.S3_RESULT_BUCKET }}
+          S3_RESULT_FOLDER: ${{ secrets.S3_RESULT_FOLDER }}
+          ATHENA_SQS_URL: ${{ secrets.ATHENA_SQS_URL }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
         if: ${{ always() }}
