@@ -2,8 +2,10 @@ name: python
 
 on:
   push:
+    branches:
+      - '*'
     paths:
-      - '*.py'
+      - '*.*'
 
 jobs:
   python:
