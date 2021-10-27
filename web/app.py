@@ -92,5 +92,5 @@ def slack_lgtm() -> Dict[str, str]:
         }
     return {
         "response_type": "in_channel",
-        "text": "Nadie te quiere."
+        "text": "Nadie te quiere!"
     }
