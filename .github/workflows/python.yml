@@ -28,7 +28,7 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
       - name : temporary patch
-        run: cp -r ./web/.mypy ./ & cp -r ./web/.flake8 ./
+        run: cp -r ../web/.mypy ../ & cp -r ../web/.flake8 ../
       - name: Run flake8
         uses: suo/flake8-github-action@releases/v1
         with:
