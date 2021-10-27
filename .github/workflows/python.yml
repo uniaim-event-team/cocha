@@ -25,6 +25,7 @@ jobs:
         with:
           checkName: 'python'   # NOTE: this needs to be the same as the job name
         env:
+          working-directory: web
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ always() }}
       - name: Run mypy
@@ -32,11 +33,13 @@ jobs:
         with:
           checkName: 'python'   # NOTE: this needs to be the same as the job name
         env:
+          working-directory: web
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ always() }}
       - name: Run pytest
-        run: cd web; pytest .
+        run: pytest .
         env:
+          working-directory: web
           ATHENA_AWS_ACCESS_KEY_ID: ${{ secrets.ATHENA_AWS_ACCESS_KEY_ID }}
           ATHENA_AWS_SECRET_ACCESS_KEY: ${{ secrets.ATHENA_AWS_SECRET_ACCESS_KEY }}
           ATHENA_DATABASE: ${{ secrets.ATHENA_DATABASE }}
