@@ -3,9 +3,7 @@ name: python
 on:
   push:
     branches:
-      - '*'
-    paths:
-      - '*.*'
+      - 'add_some_basic_settings'
 
 jobs:
   python:
