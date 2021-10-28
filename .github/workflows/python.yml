@@ -30,7 +30,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: pip-${{ hashFiles('requirements.txt') }}
+          key: pip-${{ hashFiles('web/requirements.txt') }}
       - name : temporary patch
         run: cp -r ../web/.mypy ../ & cp -r ../web/.flake8 ../
       - name: Run flake8
