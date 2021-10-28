@@ -16,7 +16,7 @@ def post_text_to_slack(channel: str, text: str) -> None:
     req.add_header("Authorization", f"Bearer {token()}")
     req.add_header("Content-Type", "application/json")
     data = {
-        'channels': channel,
+        'channel': channel,
         'text': text,
     }
     with urllib.request.urlopen(req, json.dumps(data).encode()) as res:

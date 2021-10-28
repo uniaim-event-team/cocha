@@ -27,17 +27,16 @@ def s3_result_sub_folder() -> str:
     return s3_result_folder()[len(s3_result_bucket()) + 1:]
 
 
-def begin_request_distribution_query(session: Session, url_like: str) -> str:
+def begin_request_distribution_query(session: Session, url_like: str, method: str) -> str:
     athena = session.client('athena')
     athena_query = f'''
     select
         time,
         target_processing_time,
-        elb_status_code,
-        target_status_code,
-        request_verb
+        elb_status_code
     from {log_table_prefix()}{datetime.now().strftime("%Y%m")}
     where request_url like '%{url_like}%'
+    and request_verb = '{method}'
     order by time
     '''
 
