@@ -61,4 +61,5 @@ jobs:
           ATHENA_SQS_URL: ${{ secrets.ATHENA_SQS_URL }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
         if: ${{ always() }}
