@@ -16,8 +16,8 @@ app = Chalice(app_name='web')
 
 
 if 'ATHENA_SQS_URL' not in os.environ:
-    with open('.chalice/config.json') as f:
-        sqs_queue = json.load(f)['environment_variables']['ATHENA_SQS_URL'].split('/')[-1]
+    with open('.chalice/config.json') as config_json:
+        sqs_queue = json.load(config_json)['environment_variables']['ATHENA_SQS_URL'].split('/')[-1]
 else:
     sqs_queue = os.environ['ATHENA_SQS_URL'].split('/')[-1]
 
