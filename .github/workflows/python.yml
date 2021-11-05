@@ -19,6 +19,10 @@ jobs:
           architecture: x64
       - name: Checkout
         uses: actions/checkout@v1
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('web/requirements.txt') }}
       - name: Install flake8
         run: pip install flake8
       - name: Install mypy
@@ -27,10 +31,6 @@ jobs:
         run: pip install pytest
       - name: Install requirements
         run: pip install -r requirements.txt
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: pip-${{ hashFiles('requirements.txt') }}
       - name : temporary patch
         run: cp -r ../web/.mypy ../ & cp -r ../web/.flake8 ../
       - name: Run flake8
@@ -61,4 +61,5 @@ jobs:
           ATHENA_SQS_URL: ${{ secrets.ATHENA_SQS_URL }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
         if: ${{ always() }}

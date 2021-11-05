@@ -1,11 +1,14 @@
+import hmac
 import json
 import os
 import urllib.parse
-from typing import Dict
+from datetime import datetime
+from functools import wraps
+from hashlib import sha256
+from typing import Dict, Any
 
 from chalice.app import Chalice, SQSEvent
 
-from chalicelib.service.athena import get_request_distribution_graph
 from chalicelib.service.independent.slack import post_text_to_slack
 from chalicelib.service.sqs import send_sqs_message
 
@@ -13,8 +16,8 @@ app = Chalice(app_name='web')
 
 
 if 'ATHENA_SQS_URL' not in os.environ:
-    with open('.chalice/config.json') as f:
-        sqs_queue = json.load(f)['environment_variables']['ATHENA_SQS_URL'].split('/')[-1]
+    with open('.chalice/config.json') as config_json:
+        sqs_queue = json.load(config_json)['environment_variables']['ATHENA_SQS_URL'].split('/')[-1]
 else:
     sqs_queue = os.environ['ATHENA_SQS_URL'].split('/')[-1]
 
@@ -23,22 +26,45 @@ def channel() -> str:
     return os.environ['SLACK_CHANNEL']
 
 
-@app.route('/req')
-def req() -> Dict[str, str]:
-    request = app.current_request
-    message = request.path + '?' + urllib.parse.urlencode(request.query_params or {})
-    send_sqs_message(message)
-    return {'hello': 'world'}
+def slack_signing_secret() -> str:
+    return os.environ['SLACK_SIGNING_SECRET']
 
 
-@app.route('/slack/req', methods=['POST'], content_types=['application/x-www-form-urlencoded'])
-def slack_req() -> Dict[str, str]:
+def validate_slack_post(f: Any) -> Any:
+
+    @wraps(f)
+    def deco_func(*args: Any, **kwargs: Any) -> Any:
+        request = app.current_request
+        unix_timestamp = request.headers['X-Slack-Request-Timestamp']
+        if datetime.now().timestamp() - int(unix_timestamp) > 60 * 5:
+            return {
+                "response_type": "in_channel",
+                "text": "[Error] Too old."
+            }
+
+        sig_basestring = 'v0:' + unix_timestamp + ':' + (request.raw_body or b'').decode()
+        my_signature = 'v0=' + hmac.new(slack_signing_secret().encode(), sig_basestring.encode(), sha256).hexdigest()
+        slack_signature = request.headers['X-Slack-Signature']
+        if my_signature != slack_signature:
+            return {
+                "response_type": "in_channel",
+                "text": "[Error] Wrong signature."
+            }
+
+        return f(*args, **kwargs)
+
+    return deco_func
+
+
+@app.route('/slack/{path}', methods=['POST'], content_types=['application/x-www-form-urlencoded'])
+@validate_slack_post
+def slack_req(path: str) -> Dict[str, str]:
     request = app.current_request
-    message = request.path + '?' + (request.raw_body or b'').decode()
+    message = '/slack/' + path + '?' + (request.raw_body or b'').decode()
     send_sqs_message(message)
     return {
         "response_type": "in_channel",
-        "text": "OK, just a moment..."
+        "text": f"[{path}] OK, just a moment..."
     }
 
 
@@ -49,17 +75,17 @@ def handle_sqs_message(event: SQSEvent) -> None:
         try:
             parsed_result = urllib.parse.urlparse(urllib.parse.unquote(record.body))
             query = {k: v for k, v in urllib.parse.parse_qsl(parsed_result.query)}
-            if parsed_result.path == '/req':
-                get_request_distribution_graph(query.get('p', ''), query.get('m', ''), '')
             if parsed_result.path == '/slack/req':
+                from chalicelib.service.athena import get_request_distribution_graph
                 slack_channel = query.get('channel_id', '')
                 command_input = query.get('text', '').split(' ')
                 get_request_distribution_graph(command_input[0], command_input[1], slack_channel)
-        except Exception:
-            post_text_to_slack(slack_channel or channel(), 'Nadie te quiere.')
+        except Exception as ex:
+            post_text_to_slack(slack_channel or channel(), 'Nadie te quiere.' + str(ex) + str(ex.__dict__))
 
 
 @app.route('/slack/lgtm', methods=['POST'], content_types=['application/x-www-form-urlencoded'])
+@validate_slack_post
 def slack_lgtm() -> Dict[str, str]:
     """
     BOT機能（おまけ）

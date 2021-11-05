@@ -24,7 +24,7 @@ def get_request_distribution_graph(url_like: str, method: str, slack_channel: st
     # regionはchaliceと同じregionをつかう
     session = Session(
         aws_access_key_id=aws_access_key_id(), aws_secret_access_key=aws_secret_access_key())
-    query_execution_id = begin_request_distribution_query(session, url_like)
+    query_execution_id = begin_request_distribution_query(session, url_like, method)
     input_temp = tempfile.NamedTemporaryFile()
     status = get_query_result(session, query_execution_id, input_temp.name)
     if status == 'SUCCEEDED':
