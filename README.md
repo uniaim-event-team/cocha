@@ -1,3 +1,5 @@
+![logo](logo.svg)
+
 # ChatOps by Chalice
 
 Slackと接続する設定をすることによって、AWSで収集した様々なデータをchatに表示したり、その他ChatOpsを実現するためのサービスです。
