@@ -11,7 +11,7 @@ def test_slack_req_function() -> None:
     with Client(app) as client:
         unix_timestamp = str(int(datetime.now().timestamp()))
         sig_basestring = 'v0:' + unix_timestamp + ':text=ticket/access/0%20GET'
-        slack_signature = 'v0=' + hmac.new(slack_signing_secret().encode(), sig_basestring.encode(), sha256).hexdigest()
+        slack_signature = 'v0=' + hmac.new(slack_signing_secret.encode(), sig_basestring.encode(), sha256).hexdigest()
 
         response = client.http.post(
             '/slack/req', body=b'text=ticket/access/0%20GET',

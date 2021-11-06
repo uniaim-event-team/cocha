@@ -1,12 +1,6 @@
-import os
-
-from boto3 import Session
+from boto3.session import Session
 
 
-def queue_url() -> str:
-    return os.environ['ATHENA_SQS_URL']
-
-
-def send_message(session: Session, message: str) -> None:
+def send_message(session: Session, queue_url: str, message: str) -> None:
     sqs = session.client('sqs')
-    sqs.send_message(QueueUrl=queue_url(), MessageBody=message)
+    sqs.send_message(QueueUrl=queue_url, MessageBody=message)

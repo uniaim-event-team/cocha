@@ -5,8 +5,9 @@ import { CdkStack } from '../lib/cdk-stack';
 import {readFileSync} from "fs";
 
 const app = new cdk.App();
-const propsBase = JSON.parse(readFileSync('../web/.chalice/config.json', 'utf-8'))
+const propsBase = JSON.parse(readFileSync('../web/.chalice/config.json', 'utf-8')).environment_variables
 new CdkStack(app, 'BiAthenaStack', {
   s3LogBucketName: propsBase.S3_LOG_BUCKET,
-  s3ResultBucketName: propsBase.S3_RESULT_BUCKET
+  s3ResultBucketName: propsBase.S3_RESULT_BUCKET,
+  s3MailBucketName: propsBase.S3_MAIL_BUCKET
 });

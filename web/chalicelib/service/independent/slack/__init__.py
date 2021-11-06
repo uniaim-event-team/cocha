@@ -1,19 +1,19 @@
 import json
 import urllib.parse
 import urllib.request
-import os
 from typing import Dict, List, IO
+
+from chalicelib.environment import read_environ_var
 
 boundary = '--------python'
 
 
-def token() -> str:
-    return os.environ['SLACK_BOT_TOKEN']
+token = read_environ_var('SLACK_BOT_TOKEN')
 
 
 def post_text_to_slack(channel: str, text: str) -> None:
     req = urllib.request.Request('https://slack.com/api/chat.postMessage')
-    req.add_header("Authorization", f"Bearer {token()}")
+    req.add_header("Authorization", f"Bearer {token}")
     req.add_header("Content-Type", "application/json")
     data = {
         'channel': channel,
@@ -26,7 +26,7 @@ def post_text_to_slack(channel: str, text: str) -> None:
 
 def post_image_to_slack(channel: str, png_file: IO[bytes]) -> None:
     req = urllib.request.Request('https://slack.com/api/files.upload')
-    req.add_header("Authorization", f"Bearer {token()}")
+    req.add_header("Authorization", f"Bearer {token}")
     req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
     data = multipart_form_data({'initial_comment': 'Done!', 'channels': channel, 'filetype': 'png'}, [png_file.name])
     with urllib.request.urlopen(req, data) as res:

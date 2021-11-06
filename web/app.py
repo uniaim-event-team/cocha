@@ -1,6 +1,6 @@
 import hmac
 import json
-import os
+import traceback
 import urllib.parse
 from datetime import datetime
 from functools import wraps
@@ -9,25 +9,20 @@ from typing import Dict, Any
 
 from chalice.app import Chalice, SQSEvent
 
+from chalicelib.environment import read_environ_var
 from chalicelib.service.independent.slack import post_text_to_slack
+from chalicelib.service.mail import process_error_mail
 from chalicelib.service.sqs import send_sqs_message
 
 app = Chalice(app_name='web')
 
 
-if 'ATHENA_SQS_URL' not in os.environ:
-    with open('.chalice/config.json') as config_json:
-        sqs_queue = json.load(config_json)['environment_variables']['ATHENA_SQS_URL'].split('/')[-1]
-else:
-    sqs_queue = os.environ['ATHENA_SQS_URL'].split('/')[-1]
-
-
-def channel() -> str:
-    return os.environ['SLACK_CHANNEL']
-
-
-def slack_signing_secret() -> str:
-    return os.environ['SLACK_SIGNING_SECRET']
+athena_queue_url = read_environ_var('ATHENA_SQS_URL')
+athena_queue = athena_queue_url.split('/')[-1]
+mail_queue_url = read_environ_var('MAIL_SQS_URL')
+mail_queue = mail_queue_url.split('/')[-1]
+channel = read_environ_var('SLACK_CHANNEL')
+slack_signing_secret = read_environ_var('SLACK_SIGNING_SECRET')
 
 
 def validate_slack_post(f: Any) -> Any:
@@ -43,7 +38,7 @@ def validate_slack_post(f: Any) -> Any:
             }
 
         sig_basestring = 'v0:' + unix_timestamp + ':' + (request.raw_body or b'').decode()
-        my_signature = 'v0=' + hmac.new(slack_signing_secret().encode(), sig_basestring.encode(), sha256).hexdigest()
+        my_signature = 'v0=' + hmac.new(slack_signing_secret.encode(), sig_basestring.encode(), sha256).hexdigest()
         slack_signature = request.headers['X-Slack-Signature']
         if my_signature != slack_signature:
             return {
@@ -61,14 +56,14 @@ def validate_slack_post(f: Any) -> Any:
 def slack_req(path: str) -> Dict[str, str]:
     request = app.current_request
     message = '/slack/' + path + '?' + (request.raw_body or b'').decode()
-    send_sqs_message(message)
+    send_sqs_message(read_environ_var('ATHENA_SQS_URL'), message)
     return {
         "response_type": "in_channel",
         "text": f"[{path}] OK, just a moment..."
     }
 
 
-@app.on_sqs_message(queue=sqs_queue)
+@app.on_sqs_message(queue=athena_queue)
 def handle_sqs_message(event: SQSEvent) -> None:
     for record in event:
         slack_channel = ''
@@ -81,7 +76,17 @@ def handle_sqs_message(event: SQSEvent) -> None:
                 command_input = query.get('text', '').split(' ')
                 get_request_distribution_graph(command_input[0], command_input[1], slack_channel)
         except Exception as ex:
-            post_text_to_slack(slack_channel or channel(), 'Nadie te quiere.' + str(ex) + str(ex.__dict__))
+            post_text_to_slack(slack_channel or channel, 'Nadie te quiere.' + str(ex) + traceback.format_exc())
+
+
+@app.on_sqs_message(queue=mail_queue)
+def handle_error_mail(event: SQSEvent) -> None:
+    for record in event:
+        try:
+            process_error_mail(json.loads(record.body))
+        except Exception as ex:
+            post_text_to_slack(
+                channel, '[Mail] Nadie te quiere.' + str(ex) + traceback.format_exc())
 
 
 @app.route('/slack/lgtm', methods=['POST'], content_types=['application/x-www-form-urlencoded'])
