@@ -58,7 +58,9 @@ jobs:
           S3_LOG_BUCKET: ${{ secrets.S3_LOG_BUCKET }}
           S3_RESULT_BUCKET: ${{ secrets.S3_RESULT_BUCKET }}
           S3_RESULT_FOLDER: ${{ secrets.S3_RESULT_FOLDER }}
+          S3_MAIL_BUCKET: ${{ secrets.S3_MAIL_BUCKET }}
           ATHENA_SQS_URL: ${{ secrets.ATHENA_SQS_URL }}
+          MAIL_SQS_URL: ${{ secrets.MAIL_SQS_URL }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
           SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
