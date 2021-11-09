@@ -23,8 +23,8 @@ class ErrorMail(NamedTuple):
 def process_error_mail(result: Dict[str, Any]) -> None:
     notification_type = result['notificationType']
     error_mail = []
+    subject = result['mail']['commonHeaders']['subject'].replace(',', '')
     if notification_type == 'Bounce':
-        subject = result['bounce']['commonHeaders']['subject'].replace(',', '')
         for recipients in result['bounce']['bouncedRecipients']:
             error_mail.append(ErrorMail(
                 email_address=recipients['emailAddress'],
@@ -32,15 +32,12 @@ def process_error_mail(result: Dict[str, Any]) -> None:
                 status=recipients['status'],
             ))
     elif notification_type == 'Complaint':
-        subject = result['complaint']['commonHeaders']['subject'].replace(',', '')
         for recipients in result['complaint']['complainedRecipients']:
             error_mail.append(ErrorMail(
                 email_address=recipients['emailAddress'],
                 diagnostic_code='',
                 status='',
             ))
-    else:
-        subject = ''
     output_str = 'notification_type,subject,email_address,diagnostic_code,status\n'
     for email_address, diagnostic_code, status in error_mail:
         output_str += f'{notification_type},{subject},{email_address},{diagnostic_code},{status}\n'
