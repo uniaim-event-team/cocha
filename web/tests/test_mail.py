@@ -32,9 +32,10 @@ def test_sqs() -> None:
                     {"name": "To",
                      "value": "testdayo@example.com"},
                     {"name": "Date",
-                     "value": "Sat, 06 Nov 2021 01:55:10 -0000"}],
-                "commonHeaders": {"from": ["from@example.com"],
-                                  "date": "Sat, 06 Nov 2021 01:55:10 -0000",
-                                  "to": ["testdayo@example.com"],
-                                  "subject": "Subject..."}}}'''
+                     "value": "Sat, 06 Nov 2021 01:55:10 -0000"}]
+                },
+     "mail": {"commonHeaders": {"from": ["from@example.com"],
+                                "date": "Sat, 06 Nov 2021 01:55:10 -0000",
+                                "to": ["testdayo@example.com"],
+                                "subject": "Subject..."}}}'''
     process_error_mail(json.loads(message))
