@@ -28,8 +28,8 @@ def process_error_mail(result: Dict[str, Any]) -> None:
         for recipients in result['bounce']['bouncedRecipients']:
             error_mail.append(ErrorMail(
                 email_address=recipients['emailAddress'],
-                diagnostic_code=recipients['diagnosticCode'],
-                status=recipients['status'],
+                diagnostic_code=recipients.get('diagnosticCode'),
+                status=recipients.get('status'),
             ))
     elif notification_type == 'Complaint':
         for recipients in result['complaint']['complainedRecipients']:
